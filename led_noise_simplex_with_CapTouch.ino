@@ -2,8 +2,8 @@
 #include "palettes.h"
 #include <CapacitiveSensor.h>
 
-CapacitiveSensor   cs_8_9 = CapacitiveSensor(8,9); //8-send,9-receive(resistor)
-CapacitiveSensor   cs_10_11 = CapacitiveSensor(10,11); //10-send,11-receive(resistor)
+CapacitiveSensor   cs_8_9 = CapacitiveSensor(8,9); //8-send,9-receive(cap.sensor connect here) 
+CapacitiveSensor   cs_10_11 = CapacitiveSensor(10,11); //10-send,11-receive(cap.sensor connect here) 
 
 #define NUM_LEDS 15
 #define LED_PIN 5
@@ -14,8 +14,8 @@ CRGB leds[NUM_LEDS];
 
 
 uint8_t   noiseData[NUM_LEDS];
-word touchtimeColor = 500;
-word touchtimeBright = 9000;
+word touchtimeColor = 1000; // total1 treshhold
+word touchtimeBright = 200; // total2 treshhold
 byte colorSetup = 0; 
 byte debounce = 1260;
 byte brightControl = 100;
@@ -26,11 +26,14 @@ uint8_t   octaveVal   = 1;
 uint16_t  xVal        = 0;
 int       scaleVal    = 120; //distance from the noise
 uint16_t  timeVal     = 0;
+uint8_t   sensorRes   = 60;
 
 void setup() {
   delay( 500 ); // power-up safety delay
   pinMode(8,OUTPUT);
+  pinMode(10,OUTPUT);
   pinMode(9,INPUT);
+  pinMode(11,INPUT);
   FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
   FastLED.setBrightness(  BRIGHTNESS );
   Serial.begin(115200);   
@@ -40,14 +43,14 @@ void setup() {
 void loop() {
 
   long start = millis();
-  long total1 =  cs_8_9.capacitiveSensor(30);
-  long total2 =  cs_10_11.capacitiveSensor(30);
+  long total1 =  cs_8_9.capacitiveSensor(sensorRes);
+  long total2 =  cs_10_11.capacitiveSensor(sensorRes);
 
   EVERY_N_MILLISECONDS(100){
       Serial.println(total2);
     }
 
-  if (total1>touchtimeColor){
+  if (total1  > touchtimeColor){
     switch(colorSetup){
       case 0: 
         paletic = Sunset_Real_gp;
@@ -101,7 +104,7 @@ void loop() {
     }
   }
   
-  if (total2>touchtimeBright){
+  if (total2  > touchtimeBright){
       if (brightControl >= 250){
         brightControl = 50;
       } 
